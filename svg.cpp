@@ -26,6 +26,17 @@ void
 svg_end() {
 cout << "</svg>\n";
 }
+size_t calculation_star_factor (size_t MAX_WIDTH, size_t max_count)
+{
+    size_t star_factor=MAX_WIDTH/max_count;
+    return (star_factor);
+}
+
+size_t calculation_interval_width (size_t star_factor, size_t interval)
+{
+    size_t interval_width=star_factor*interval;
+    return(interval_width);
+}
 
 void
 show_histogram_svg(const vector<size_t>& bins)
@@ -39,6 +50,24 @@ show_histogram_svg(const vector<size_t>& bins)
     const auto BLOCK_WIDTH = 10;
     svg_begin(IMAGE_WIDTH,IMAGE_HEIGHT);
     double top = 0;
+       size_t max_count=0;
+    for (size_t bin : bins)
+    {
+        if(max_count<bin)
+            max_count=bin;
+    }
+    double MAX_WIDTH=IMAGE_WIDTH-4.5*TEXT_WIDTH;
+    size_t interval;
+    cerr <<"Enter interval: ";
+    cin >> interval;
+    size_t interval_count;
+    if (max_count%interval!=0)
+        interval_count=max_count/interval+1;
+    else
+        interval_count=max_count/interval;
+    star_factor=calculation_star_factor(MAX_WIDTH, max_count);
+    size_t interval_width=calculation_interval_width(star_factor,interval);
+
     for (size_t bin : bins)
     {
         const double bin_width = BLOCK_WIDTH * bin;
@@ -46,5 +75,21 @@ show_histogram_svg(const vector<size_t>& bins)
         svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT,"lime","#00FF00");
         top += BIN_HEIGHT;
     }
-
+    size_t otstup= (double)bin_count*BIN_HEIGHT+15;
+    if (interval<4 || interval>9)
+        svg_text(TEXT_WIDTH, otstup, "ERROR!");
+    else
+    {
+        size_t abscissa=TEXT_WIDTH;
+        for (int i=1; i<=interval_count; i++)
+        {
+            svg_rect(abscissa, otstup, interval_width, BIN_HEIGHT, "black", "#90EE90");
+            abscissa+=interval_width;
+        }
+        svg_text(TEXT_WIDTH, otstup+50, "0");
+        svg_text(TEXT_WIDTH+interval_width, otstup+50, to_string(interval));
+        svg_text(TEXT_WIDTH+interval_count*interval_width, otstup+50, to_string(interval*interval_count));
+    }
+    svg_end ();
 }
+
